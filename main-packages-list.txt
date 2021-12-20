@@ -1,2 +1,3 @@
 hostname
-mariadb-server
+mariadb-server 
+procps
