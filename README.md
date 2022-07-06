@@ -3,7 +3,7 @@ Metal3 MariaDB Container
 
 This repo contains the files needed to build the MariaDB image used by Metal3.
 
-Description
+Description.
 -----------
 
 The following environment variables can be passed in to customize run-time functionality:
