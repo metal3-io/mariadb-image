@@ -1,4 +1,4 @@
-Metal3 MariaDB Container
+Metal3 MariaDB Container.
 ========================
 
 This repo contains the files needed to build the MariaDB image used by Metal3.
