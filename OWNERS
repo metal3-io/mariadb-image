@@ -5,7 +5,6 @@ approvers:
  - derekhiggins
  - dtantsur
  - elfosardo
- - hardys
 
 reviewers:
  - iurygregory
@@ -13,3 +12,6 @@ reviewers:
  - namnx228
  - stbenjam
  - zaneb
+
+emeritus_approvers:
+ - hardys
