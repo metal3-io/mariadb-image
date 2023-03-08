@@ -5,13 +5,17 @@ approvers:
  - derekhiggins
  - dtantsur
  - elfosardo
+ - kashifest
 
 reviewers:
  - iurygregory
- - maelk
- - namnx228
+ - lentzi90
  - stbenjam
  - zaneb
 
 emeritus_approvers:
  - hardys
+
+emeritus_reviewers:
+ - maelk
+ - namnx228
