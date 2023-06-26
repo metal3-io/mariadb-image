@@ -12,3 +12,4 @@ functionality:
 - `MARIADB_CERT_FILE` and `MARIADB_KEY_FILE` - Paths to the TLS certificates.
    Default to `/certs/mariadb/tls.crt` and `/certs/mariadb/tls.key`.
    TLS is enabled if these exist.
+- `MARIADB_MAX_CONNECTIONS` - MariaDB max connection option
