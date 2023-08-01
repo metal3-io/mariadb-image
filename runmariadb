@@ -22,8 +22,6 @@ if [ ! -f "$MARIADB_CERT_FILE" ] && [ -f "$MARIADB_KEY_FILE" ] ; then
     exit 1
 fi
 
-ln -sf /proc/self/fd/1 /var/log/mariadb/mariadb.log
-
 # Restart mysqld when the certificate is updated
 if [[ -f "$MARIADB_CERT_FILE" && "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "true" ]]; then
     # shellcheck disable=SC2034,SC2162
@@ -40,6 +38,7 @@ max_heap_table_size = 1M
 innodb_buffer_pool_size = 5M
 innodb_log_buffer_size = 512K
 user = "${USER}"
+log_warnings = 4
 EOF
 
     # Config MariaDB to enable TLS
@@ -62,9 +61,7 @@ CREATE DATABASE IF NOT EXISTS  ironic ;
 FLUSH PRIVILEGES ;
 EOSQL
 
-    # mysqld_safe closes stdout/stderr if no bash options are set ($- == '')
-    # turn on tracing to prevent this
-    exec bash -x /usr/bin/mysqld_safe --init-file /tmp/configure-mysql.sql
+    exec mysqld --init-file /tmp/configure-mysql.sql --skip-log-error
 else
-    exec bash -x /usr/bin/mysqld_safe
+    exec mysqld --skip-log-error
 fi
