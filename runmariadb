@@ -1,10 +1,19 @@
 #!/usr/bin/bash
 
-set -eux
+set -eu
+
+if [[ -z "${MARIADB_PASSWORD:-}" ]]; then
+    echo "Missing database password"
+    exit 1
+fi
+
+set -x
 
 PATH=$PATH:/usr/sbin/
 DATADIR="/var/lib/mysql"
-MARIADB_PASSWORD=${MARIADB_PASSWORD:-"change_me"}
+MARIADB_DATABASE=${MARIADB_DATABASE:-ironic}
+MARIADB_USER=${MARIADB_USER:-ironic}
+MARIADB_HOST=${MARIADB_HOST:-localhost}
 MARIADB_CONF_FILE="/etc/my.cnf.d/metal3.cnf"
 MARIADB_CERT_FILE=/certs/mariadb/tls.crt
 MARIADB_KEY_FILE=/certs/mariadb/tls.key
@@ -52,12 +61,15 @@ EOF
 
     mysql_install_db --datadir="$DATADIR" --skip-test-db --user="${USER}" --group="${USER}"
 
+    # Don't log the credentials
+    set +x
+
     cat > /tmp/configure-mysql.sql <<-EOSQL
 DELETE FROM mysql.user ;
-CREATE USER 'ironic'@'localhost' identified by '${MARIADB_PASSWORD}' ;
-GRANT ALL on *.* TO 'ironic'@'localhost' WITH GRANT OPTION ;
+CREATE USER '${MARIADB_USER}'@'${MARIADB_HOST}' identified by '${MARIADB_PASSWORD}' ;
+GRANT ALL on *.* TO '${MARIADB_USER}'@'${MARIADB_HOST}' WITH GRANT OPTION ;
 DROP DATABASE IF EXISTS test ;
-CREATE DATABASE IF NOT EXISTS  ironic ;
+CREATE DATABASE IF NOT EXISTS ${MARIADB_DATABASE} ;
 FLUSH PRIVILEGES ;
 EOSQL
 
