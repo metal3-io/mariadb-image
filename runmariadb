@@ -56,6 +56,7 @@ EOF
 ssl
 ssl_cert = ${MARIADB_CERT_FILE}
 ssl_key = ${MARIADB_KEY_FILE}
+require_secure_transport
 EOF
     fi
 
