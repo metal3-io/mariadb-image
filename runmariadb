@@ -40,20 +40,19 @@ if [[ -f "$MARIADB_CERT_FILE" && "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "
 fi
 
 if [ ! -d "${DATADIR}/mysql" ]; then
-    cat > "$MARIADB_CONF_FILE" <<EOF
+    cat > "${MARIADB_CONF_FILE}" <<EOF
 [mysqld]
-max_connections = "${MARIADB_MAX_CONNECTIONS}"
+max_connections = ${MARIADB_MAX_CONNECTIONS}
 max_heap_table_size = 1M
 innodb_buffer_pool_size = 5M
 innodb_log_buffer_size = 512K
-user = "${USER}"
+user = ${USER}
 log_warnings = 4
 EOF
 
     # Config MariaDB to enable TLS
-    if [ -f "$MARIADB_CERT_FILE" ]; then
+    if [ -f "${MARIADB_CERT_FILE}" ]; then
         cat >> "$MARIADB_CONF_FILE" <<EOF
-ssl
 ssl_cert = ${MARIADB_CERT_FILE}
 ssl_key = ${MARIADB_KEY_FILE}
 require_secure_transport
