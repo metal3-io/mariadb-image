@@ -3,7 +3,7 @@
 set -eu
 
 if [[ -z "${MARIADB_PASSWORD:-}" ]]; then
-    echo "Missing database password"
+    echo "FATAL: Missing database password, set the MARIADB_PASSWORD variable"
     exit 1
 fi
 
@@ -23,11 +23,11 @@ MARIADB_MAX_CONNECTIONS=${MARIADB_MAX_CONNECTIONS:-"64"}
 
 mkdir -p "$(dirname "${MARIADB_CERT_FILE}")"
 if [ -f "$MARIADB_CERT_FILE" ] && [ ! -f "$MARIADB_KEY_FILE" ] ; then
-    echo "Missing TLS private key file ${MARIADB_KEY_FILE}"
+    echo "FATAL: Missing TLS private key file ${MARIADB_KEY_FILE} while certificate ${MARIADB_CERT_FILE} exists"
     exit 1
 fi
 if [ ! -f "$MARIADB_CERT_FILE" ] && [ -f "$MARIADB_KEY_FILE" ] ; then
-    echo "Missing TLS Certificate file ${MARIADB_CERT_FILE}"
+    echo "FATAL: Missing TLS certificate file ${MARIADB_CERT_FILE} while private key ${MARIADB_KEY_FILE} exists"
     exit 1
 fi
 
