@@ -1,11 +1,20 @@
 #!/usr/bin/bash
 
-set -eux
+set -eu
+
+if [[ -z "${MARIADB_PASSWORD:-}" ]]; then
+    echo "FATAL: Missing database password, set the MARIADB_PASSWORD variable"
+    exit 1
+fi
+
+set -x
 
 PATH=$PATH:/usr/sbin/
 DATADIR="/var/lib/mysql"
-MARIADB_PASSWORD=${MARIADB_PASSWORD:-"change_me"}
-MARIADB_CONF_FILE="/etc/my.cnf.d/mariadb-server.cnf"
+MARIADB_DATABASE=${MARIADB_DATABASE:-ironic}
+MARIADB_USER=${MARIADB_USER:-ironic}
+MARIADB_HOST=${MARIADB_HOST:-localhost}
+MARIADB_CONF_FILE="/etc/my.cnf.d/metal3.cnf"
 MARIADB_CERT_FILE=/certs/mariadb/tls.crt
 MARIADB_KEY_FILE=/certs/mariadb/tls.key
 RESTART_CONTAINER_CERTIFICATE_UPDATED=${RESTART_CONTAINER_CERTIFICATE_UPDATED:-"false"}
@@ -14,15 +23,13 @@ MARIADB_MAX_CONNECTIONS=${MARIADB_MAX_CONNECTIONS:-"64"}
 
 mkdir -p "$(dirname "${MARIADB_CERT_FILE}")"
 if [ -f "$MARIADB_CERT_FILE" ] && [ ! -f "$MARIADB_KEY_FILE" ] ; then
-    echo "Missing TLS private key file ${MARIADB_KEY_FILE}"
+    echo "FATAL: Missing TLS private key file ${MARIADB_KEY_FILE} while certificate ${MARIADB_CERT_FILE} exists"
     exit 1
 fi
 if [ ! -f "$MARIADB_CERT_FILE" ] && [ -f "$MARIADB_KEY_FILE" ] ; then
-    echo "Missing TLS Certificate file ${MARIADB_CERT_FILE}"
+    echo "FATAL: Missing TLS certificate file ${MARIADB_CERT_FILE} while private key ${MARIADB_KEY_FILE} exists"
     exit 1
 fi
-
-ln -sf /proc/self/fd/1 /var/log/mariadb/mariadb.log
 
 # Restart mysqld when the certificate is updated
 if [[ -f "$MARIADB_CERT_FILE" && "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "true" ]]; then
@@ -33,33 +40,40 @@ if [[ -f "$MARIADB_CERT_FILE" && "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "
 fi
 
 if [ ! -d "${DATADIR}/mysql" ]; then
-    crudini --set "$MARIADB_CONF_FILE" mysqld max_connections "${MARIADB_MAX_CONNECTIONS}"
-    crudini --set "$MARIADB_CONF_FILE" mysqld max_heap_table_size 1M
-    crudini --set "$MARIADB_CONF_FILE" mysqld innodb_buffer_pool_size 5M
-    crudini --set "$MARIADB_CONF_FILE" mysqld innodb_log_buffer_size 512K
-    crudini --set "$MARIADB_CONF_FILE" mysqld user "${USER}"
+    cat > "${MARIADB_CONF_FILE}" <<EOF
+[mysqld]
+max_connections = ${MARIADB_MAX_CONNECTIONS}
+max_heap_table_size = 1M
+innodb_buffer_pool_size = 5M
+innodb_log_buffer_size = 512K
+user = ${USER}
+log_warnings = 4
+EOF
 
     # Config MariaDB to enable TLS
-    if [ -f "$MARIADB_CERT_FILE" ]; then
-        crudini --set "$MARIADB_CONF_FILE" mariadb-10.3 ssl on
-        crudini --set "$MARIADB_CONF_FILE" mariadb-10.3 ssl_cert "${MARIADB_CERT_FILE}"
-        crudini --set "$MARIADB_CONF_FILE" mariadb-10.3 ssl_key "${MARIADB_KEY_FILE}"
+    if [ -f "${MARIADB_CERT_FILE}" ]; then
+        cat >> "$MARIADB_CONF_FILE" <<EOF
+ssl_cert = ${MARIADB_CERT_FILE}
+ssl_key = ${MARIADB_KEY_FILE}
+require_secure_transport
+EOF
     fi
 
     mysql_install_db --datadir="$DATADIR" --skip-test-db --user="${USER}" --group="${USER}"
 
+    # Don't log the credentials
+    set +x
+
     cat > /tmp/configure-mysql.sql <<-EOSQL
 DELETE FROM mysql.user ;
-CREATE USER 'ironic'@'localhost' identified by '${MARIADB_PASSWORD}' ;
-GRANT ALL on *.* TO 'ironic'@'localhost' WITH GRANT OPTION ;
+CREATE USER '${MARIADB_USER}'@'${MARIADB_HOST}' identified by '${MARIADB_PASSWORD}' ;
+GRANT ALL on *.* TO '${MARIADB_USER}'@'${MARIADB_HOST}' WITH GRANT OPTION ;
 DROP DATABASE IF EXISTS test ;
-CREATE DATABASE IF NOT EXISTS  ironic ;
+CREATE DATABASE IF NOT EXISTS ${MARIADB_DATABASE} ;
 FLUSH PRIVILEGES ;
 EOSQL
 
-    # mysqld_safe closes stdout/stderr if no bash options are set ($- == '')
-    # turn on tracing to prevent this
-    exec bash -x /usr/bin/mysqld_safe --init-file /tmp/configure-mysql.sql
+    exec mysqld --init-file /tmp/configure-mysql.sql --skip-log-error
 else
-    exec bash -x /usr/bin/mysqld_safe
+    exec mysqld --skip-log-error
 fi

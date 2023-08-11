@@ -6,7 +6,8 @@ echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 # Tell RPM to skip installing documentation
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
-dnf install -y epel-release 'dnf-command(config-manager)' python3-pip
+dnf install -y 'dnf-command(config-manager)' \
+    https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 dnf config-manager --set-disabled epel
 
 xargs -rtd'\n' dnf install -y < /tmp/"${PKGS_LIST}"
@@ -18,8 +19,6 @@ if [[ -n "${EXTRA_PKGS_LIST:-}" ]]; then
 fi
 
 dnf install -y --enablerepo=epel inotify-tools
-
-python3 -m pip install crudini
 
 dnf clean all
 rm -rf /var/cache/{yum,dnf}/*
