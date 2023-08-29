@@ -65,11 +65,12 @@ EOF
     set +x
 
     cat > /tmp/configure-mysql.sql <<-EOSQL
-DELETE FROM mysql.user ;
 CREATE USER '${MARIADB_USER}'@'${MARIADB_HOST}' identified by '${MARIADB_PASSWORD}' ;
 GRANT ALL on *.* TO '${MARIADB_USER}'@'${MARIADB_HOST}' WITH GRANT OPTION ;
 DROP DATABASE IF EXISTS test ;
 CREATE DATABASE IF NOT EXISTS ${MARIADB_DATABASE} ;
+DROP USER IF EXISTS 'root'@'localhost' ;
+DROP USER IF EXISTS 'mysql'@'localhost' ;
 FLUSH PRIVILEGES ;
 EOSQL
 
