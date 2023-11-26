@@ -9,6 +9,7 @@ jobs:
   build:
     name: Build container images
     runs-on: ubuntu-latest
+    if: github.repository == 'metal3-io/mariadb-image'
     permissions:
       contents: read
     steps:
