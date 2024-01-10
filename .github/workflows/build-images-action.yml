@@ -4,6 +4,8 @@ on:
     branches:
       - 'main'
       - 'release-*'
+    tags:
+      - 'capm3-v*'
 permissions: {}
 jobs:
   build:
@@ -13,7 +15,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: build mariabd image
+      - name: build mariadb image
         uses: toptal/jenkins-job-trigger-action@137fff703dd260b52b53d3ba1960396415abc568 # 1.0.2
         with:
           jenkins_url: "https://jenkins.nordix.org/"
@@ -22,7 +24,6 @@ jobs:
           job_name: "metal3_mariadb_container_image_building"
           job_params: |
             {
-              "BUILD_CONTAINER_IMAGE_NAME": "mariadb",
-              "BUILD_CONTAINER_IMAGE_BRANCH": "${{ github.ref }}"
+              "BUILD_CONTAINER_IMAGE_GIT_REFERENCE": "${{ github.ref }}"
             }
           job_timeout: "1000"
