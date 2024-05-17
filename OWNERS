@@ -1,21 +1,15 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
 approvers:
- - bfournie
- - derekhiggins
- - dtantsur
- - elfosardo
- - kashifest
+- mariadb-image-maintainers
 
 reviewers:
- - iurygregory
- - lentzi90
- - stbenjam
- - zaneb
+- mariadb-image-maintainers
+- mariadb-image-reviewers
 
 emeritus_approvers:
- - hardys
+- hardys
 
 emeritus_reviewers:
- - maelk
- - namnx228
+- maelk
+- namnx228

@@ -1,0 +1,15 @@
+# See the OWNERS docs: https://git.k8s.io/community/contributors/guide/owners.md
+
+aliases:
+  mariadb-image-maintainers:
+  - bfournie
+  - derekhiggins
+  - dtantsur
+  - elfosardo
+  - kashifest
+
+  mariadb-image-reviewers:
+  - iurygregory
+  - lentzi90
+  - stbenjam
+  - zaneb
