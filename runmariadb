@@ -2,9 +2,19 @@
 
 set -eu
 
-if [[ -z "${MARIADB_PASSWORD:-}" ]]; then
-    echo "FATAL: Missing database password, set the MARIADB_PASSWORD variable"
-    exit 1
+PASSWORD_FILE="/run/secrets/mariadb-password" # Specify the password file location
+
+if [ -f "$PASSWORD_FILE" ]; then
+  # Password file exists, read from it 
+  MARIADB_PASSWORD=$(cat "$PASSWORD_FILE")
+  echo "Using password from file"
+elif [ -n "$MARIADB_PASSWORD" ]; then
+  # Password file doesn't exist, but environment variable is set, use it
+  echo "Using MARIADB_PASSWORD from environment variable"
+else
+  # Neither file nor environment variable exists, handle the error
+  echo "FATAL: MARIADB_PASSWORD not found in file or environment variable"
+  exit 1 
 fi
 
 set -x
