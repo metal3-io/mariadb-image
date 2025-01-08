@@ -2,12 +2,23 @@
 
 set -eu
 
+AUTHROOT=/auth/mariadb
+
+if [[ -z "${MARIADB_PASSWORD:-}" ]] && [[ -f "${AUTHROOT}/password" ]]; then
+    MARIADB_PASSWORD="$(<"${AUTHROOT}"/password)"
+fi
+
 if [[ -z "${MARIADB_PASSWORD:-}" ]]; then
-    echo "FATAL: Missing database password, set the MARIADB_PASSWORD variable"
+    echo "FATAL: Missing database password"
+    echo "HINT: mount the secret at ${AUTHROOT} or set the MARIADB_PASSWORD variable"
     exit 1
 fi
 
 set -x
+
+if [[ -z "${MARIADB_USER:-}" ]] && [[ -f "${AUTHROOT}/username" ]]; then
+    MARIADB_USER="$(<"${AUTHROOT}"/username)"
+fi
 
 PATH=$PATH:/usr/sbin/
 DATADIR="/var/lib/mysql"
