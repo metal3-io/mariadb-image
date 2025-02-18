@@ -8,8 +8,10 @@ reviewers:
 - mariadb-image-reviewers
 
 emeritus_approvers:
+- bfournie
 - hardys
 
 emeritus_reviewers:
 - maelk
 - namnx228
+- stbenjam
