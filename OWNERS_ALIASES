@@ -2,7 +2,6 @@
 
 aliases:
   mariadb-image-maintainers:
-  - bfournie
   - derekhiggins
   - dtantsur
   - elfosardo
@@ -11,5 +10,4 @@ aliases:
   mariadb-image-reviewers:
   - iurygregory
   - lentzi90
-  - stbenjam
   - zaneb
